@@ -28,12 +28,23 @@ MAGMA_VERSION="${MAGMA_VERSION:-v1.8}"
 CLOUD_INSTALL="cloud"
 GIT_URL="${GIT_URL:-https://github.com/magma/magma.git}"
 INTERFACE_DIR="/etc/network/interfaces.d"
+SECURE_BOOT=$(mokutil --sb-state)
+
+
 
 echo "Checking if the script has been executed by root user"
 if [ "$WHOAMI" != "root" ]; then
   echo "You're executing the script as $WHOAMI instead of root.. exiting"
   exit 1
 fi
+
+echo "Installing mokutil to verify SecureBoot"
+apt install mokutil
+echo "Checking if SecureBoot is disabled"
+if [ "$SECURE_BOOT" == "SecureBoot enabled" ]; then
+  echo "Secure boot is enabled, please disabled it."
+  exit 1
+fi 
 
 echo "Checking if Ubuntu is installed"
 if ! grep -q 'Ubuntu' /etc/issue; then
